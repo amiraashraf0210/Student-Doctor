@@ -340,14 +340,10 @@
     // Update fetchStudents to directly update the list
     async function fetchStudents() {
       try {
-        console.log("Fetching students...");
         const res = await fetch(`${api}/fetch-students`);
-        console.log("Response received:", res);
         const data = await res.json();
-        console.log("Students data:", data);
         updateStudentList(data);
       } catch (error) {
-        console.error("Error fetching students:", error);
         showToast("Error fetching students", true);
       }
     }
@@ -355,24 +351,19 @@
     // Update fetchDoctors to directly update the list
     async function fetchDoctors() {
       try {
-        console.log("Fetching doctors...");
         const res = await fetch(`${api}/fetch-doctors`);
-        console.log("Response received:", res);
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
         const data = await res.json();
-        console.log("Doctors data:", data);
         if (!Array.isArray(data)) {
           throw new Error("Invalid data format received");
         }
         updateDoctorList(data);
-        // Only show success message when manually refreshing
         if (document.getElementById('doctorSearch').value !== '') {
           showToast("Doctors fetched successfully!");
         }
       } catch (error) {
-        console.error("Error fetching doctors:", error);
         showToast("Error fetching doctors: " + error.message, true);
       }
     }
@@ -385,9 +376,7 @@
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        console.log("All data:", data);
-
-        // Update both lists
+        
         updateAllStudentsList(data.students);
         updateAllDoctorsList(data.doctors);
 
@@ -397,7 +386,6 @@
 
         showToast("Data fetched successfully!");
       } catch (error) {
-        console.error("Error fetching all data:", error);
         showToast("Error fetching all data", true);
       }
     }
@@ -638,7 +626,6 @@
         );
         updateStudentList(filteredStudents);
       } catch (error) {
-        console.error("Error searching students:", error);
         showToast("Error searching students", true);
       }
     }
@@ -654,7 +641,6 @@
         );
         updateDoctorList(filteredDoctors);
       } catch (error) {
-        console.error("Error searching doctors:", error);
         showToast("Error searching doctors", true);
       }
     }
@@ -693,26 +679,46 @@
 
     async function submitStudentEdit() {
       try {
+        const oldName = currentEditName;
+        const newName = document.getElementById('editStudentName').value;
+        const age = Number(document.getElementById('editStudentAge').value);
+        const level = Number(document.getElementById('editStudentLevel').value);
+        const address = document.getElementById('editStudentAddress').value;
+
+        // Validate required fields
+        if (!oldName || !newName || !age || !level || !address) {
+          showToast("All fields are required", true);
+          return;
+        }
+
         const updatedStudent = {
-          name: document.getElementById('editStudentName').value,
-          age: Number(document.getElementById('editStudentAge').value),
-          level: Number(document.getElementById('editStudentLevel').value),
-          address: document.getElementById('editStudentAddress').value
+          oldName: oldName,
+          newName: newName,
+          age: age,
+          level: level,
+          address: address
         };
+
+        console.log("Sending update request:", updatedStudent);
+
         const response = await fetch(`${api}/update-student`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedStudent),
+          body: JSON.stringify(updatedStudent)
         });
-        if (response.ok) {
-          showToast("Student updated successfully!");
-          editStudentModal.hide();
-          fetchStudents();
-        } else {
+
+        if (!response.ok) {
           const error = await response.json();
+          console.error("Update failed:", error);
           showToast(error.error || "Error updating student", true);
+          return;
         }
+
+        showToast("Student updated successfully!");
+        editStudentModal.hide();
+        fetchStudents();
       } catch (error) {
+        console.error("Error in submitStudentEdit:", error);
         showToast("Error updating student", true);
       }
     }

@@ -101,9 +101,10 @@ app.delete("/delete-student", async (req, res) => {
 
 app.put("/update-student", async (req, res) => {
     try {
-        const { name, age, level, address } = req.body;
-        if (!name) {
-            return res.status(400).json({ error: "Student name is required" });
+        const { oldName, newName, age, level, address } = req.body;
+
+        if (!oldName) {
+            return res.status(400).json({ error: "Student's current name is required" });
         }
 
         // Validate age if provided
@@ -111,15 +112,21 @@ app.put("/update-student", async (req, res) => {
             return res.status(400).json({ error: "Age must be a valid number between 0 and 120" });
         }
 
+        const updateData = {};
+        if (newName) updateData.name = newName;
+        if (age) updateData.age = age;
+        if (level) updateData.level = level;
+        if (address) updateData.address = address;
+
         const result = await db.collection("students").updateOne(
-            { name },
-            { $set: req.body }
+            { name: oldName },
+            { $set: updateData }
         );
 
         if (result.matchedCount === 0) {
             return res.status(404).json({ error: "Student not found" });
         }
-        res.status(200).json({ message: "Student updated successfully", student: req.body });
+        res.status(200).json({ message: "Student updated successfully", student: updateData });
     } catch (error) {
         console.error("Error updating student:", error);
         res.status(500).json({ error: "Could not update student", details: error.message });
