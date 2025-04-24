@@ -129,10 +129,14 @@ app.put("/update-student", async (req, res) => {
 // Doctors APIs
 app.post("/add-doctor", async (req, res) => {
     try {
-        const { name, age, phone } = req.body;
+        const { name, age, phone } = req.query;
 
         if (!name || !age || !phone) {
-            return res.status(400).json({ error: "All fields are required" });
+            return res.status(400).json({ error: "All fields (name, age, phone) are required" });
+        }
+
+        if (isNaN(age) || age < 0 || age > 120) {
+            return res.status(400).json({ error: "Age must be a valid number between 0 and 120" });
         }
 
         const doctor = {
@@ -182,8 +186,7 @@ app.delete("/delete-doctor", async (req, res) => {
 
 app.put("/update-doctor", async (req, res) => {
     try {
-        const { oldName, newName } = req.query;
-        const { age, phone } = req.body;
+        const { oldName, newName, age, phone } = req.query;
 
         if (!oldName) {
             return res.status(400).json({ error: "Doctor's current name is required" });
