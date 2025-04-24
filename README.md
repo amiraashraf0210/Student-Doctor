@@ -3,7 +3,7 @@ A web application for managing students and doctors information
 
 ## Features
 
-- Ad, edit, and delete students and doctors
+- Add, edit, and delete students and doctors
 - Search functionality for both students and doctors
 - View all data in a single view
 - Modern and responsive UI
