@@ -376,7 +376,7 @@
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        
+
         updateAllStudentsList(data.students);
         updateAllDoctorsList(data.doctors);
 
@@ -492,15 +492,13 @@
     document.getElementById("doctorForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       try {
-        const doctor = {
-          name: document.getElementById("docName").value,
-          age: document.getElementById("docAge").value,
-          phone: document.getElementById("docPhone").value
-        };
-        const response = await fetch(`${api}/add-doctor`, {
+        const name = document.getElementById("docName").value;
+        const age = document.getElementById("docAge").value;
+        const phone = document.getElementById("docPhone").value;
+
+        const response = await fetch(`${api}/add-doctor?name=${encodeURIComponent(name)}&age=${encodeURIComponent(age)}&phone=${encodeURIComponent(phone)}`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(doctor)
+          headers: { "Content-Type": "application/json" }
         });
         if (response.ok) {
           showToast("Doctor added successfully!");
@@ -575,7 +573,7 @@
     async function deleteStudent(name) {
       if (confirm(`Are you sure you want to delete ${name}?`)) {
         try {
-          const response = await fetch(`${api}/delete-student?name=${name}`, {
+          const response = await fetch(`${api}/delete-student?name=${encodeURIComponent(name)}`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" }
           });
@@ -750,10 +748,16 @@
         const age = Number(document.getElementById('editDoctorAge').value);
         const phone = document.getElementById('editDoctorPhone').value;
 
-        const response = await fetch(`${api}/update-doctor?oldName=${encodeURIComponent(oldName)}&newName=${encodeURIComponent(newName)}`, {
+        const queryParams = new URLSearchParams({
+          oldName: oldName,
+          newName: newName,
+          age: age,
+          phone: phone
+        });
+
+        const response = await fetch(`${api}/update-doctor?${queryParams}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ age, phone })
+          headers: { "Content-Type": "application/json" }
         });
         if (response.ok) {
           showToast("Doctor updated successfully!");
