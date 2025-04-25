@@ -558,7 +558,7 @@
             <small class="text-muted">Age: ${d.age} | Phone: ${d.phone}</small>
           </div>
           <div class="action-buttons">
-            <button class="btn btn-sm btn-warning" onclick="editDoctor('${d.name}')">
+            <button class="btn btn-sm btn-warning" onclick="editDoctor('${d._id}')">
               <i class="fas fa-edit"></i>
             </button>
             <button class="btn btn-sm btn-danger" onclick="deleteDoctor('${d.name}')">
@@ -716,12 +716,12 @@
       }
     }
 
-    async function editDoctor(name) {
-      currentEditName = name;
+    async function editDoctor(id) {
+      currentEditId = id;
       try {
         const response = await fetch(`${api}/fetch-doctors`);
         const doctors = await response.json();
-        const doctor = doctors.find(d => d.name === name);
+        const doctor = doctors.find(d => d._id === id);
         if (doctor) {
           document.getElementById('editDoctorName').value = doctor.name;
           document.getElementById('editDoctorAge').value = doctor.age;
@@ -738,22 +738,24 @@
 
     async function submitDoctorEdit() {
       try {
-        const oldName = currentEditName;
-        const newName = document.getElementById('editDoctorName').value;
+        const id = currentEditId;
+        const name = document.getElementById('editDoctorName').value;
         const age = Number(document.getElementById('editDoctorAge').value);
         const phone = document.getElementById('editDoctorPhone').value;
 
-        const queryParams = new URLSearchParams({
-          oldName: oldName,
-          newName: newName,
-          age: age,
-          phone: phone
+        const response = await fetch(`${api}/update-doctor`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            id: id,
+            name: name,
+            age: age,
+            phone: phone
+          })
         });
 
-        const response = await fetch(`${api}/update-doctor?${queryParams}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" }
-        });
         if (response.ok) {
           showToast("Doctor updated successfully!");
           editDoctorModal.hide();

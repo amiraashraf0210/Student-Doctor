@@ -118,6 +118,8 @@ app.put("/update-student", async (req, res) => {
         if (level) updateData.level = level;
         if (address) updateData.address = address;
 
+        console.log(updateData)
+
         const result = await db.collection("students").updateOne(
             { _id: new ObjectId(id) },
             { $set: updateData }
@@ -193,10 +195,10 @@ app.delete("/delete-doctor", async (req, res) => {
 
 app.put("/update-doctor", async (req, res) => {
     try {
-        const { oldName, newName, age, phone } = req.query;
+        const { id, name, age, phone } = req.body;
 
-        if (!oldName) {
-            return res.status(400).json({ error: "Doctor's current name is required" });
+        if (!id) {
+            return res.status(400).json({ error: "Doctor ID is required" });
         }
 
         // Validate age if provided
@@ -205,12 +207,12 @@ app.put("/update-doctor", async (req, res) => {
         }
 
         const updateData = {};
-        if (newName) updateData.name = newName;
+        if (name) updateData.name = name;
         if (age) updateData.age = age;
         if (phone) updateData.phone = phone;
 
         const result = await db.collection("doctors").updateOne(
-            { name: oldName },
+            { _id: new ObjectId(id) },
             { $set: updateData }
         );
 
