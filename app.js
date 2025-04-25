@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const app = express();
 const port = 3000;
 
@@ -83,12 +83,12 @@ app.get("/fetch-students", async (req, res) => {
 
 app.delete("/delete-student", async (req, res) => {
     try {
-        const { name } = req.query;
-        if (!name) {
-            return res.status(400).json({ error: "Student name is required" });
+        const { id } = req.query;
+        if (!id) {
+            return res.status(400).json({ error: "Student ID is required" });
         }
 
-        const result = await db.collection("students").deleteOne({ name });
+        const result = await db.collection("students").deleteOne({ _id: new ObjectId(id) });
         if (result.deletedCount === 0) {
             return res.status(404).json({ error: "Student not found" });
         }
@@ -101,25 +101,25 @@ app.delete("/delete-student", async (req, res) => {
 
 app.put("/update-student", async (req, res) => {
     try {
-        const { oldName, newName, age, level, address } = req.body;
+        const { id, name, age, level, address } = req.body;
 
-        if (!oldName) {
-            return res.status(400).json({ error: "Student's current name is required" });
+        if (!id) {
+            return res.status(400).json({ error: "Student ID is required" });
         }
 
         // Validate age if provided
-        if (age && (isNaN(age) || age < 0 || age > 120)) {
+        if (isNaN(age) || age < 0 || age > 120) {
             return res.status(400).json({ error: "Age must be a valid number between 0 and 120" });
         }
 
         const updateData = {};
-        if (newName) updateData.name = newName;
+        if (name) updateData.name = name;
         if (age) updateData.age = age;
         if (level) updateData.level = level;
         if (address) updateData.address = address;
 
         const result = await db.collection("students").updateOne(
-            { name: oldName },
+            { _id: new ObjectId(id) },
             { $set: updateData }
         );
 
